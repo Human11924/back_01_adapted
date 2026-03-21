@@ -1,0 +1,268 @@
+/* login.css — main content only (between Header and Footer) */
+
+.login {
+  flex: 1;
+}
+
+.loginMain {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-page-bg);
+}
+
+.loginMain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side at 52% 18%, rgba(255, 190, 0, 0.22), transparent 70%),
+    radial-gradient(closest-side at 82% 72%, rgba(47, 38, 33, 0.06), transparent 60%);
+}
+
+.loginMain::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 144px;
+  width: 320px;
+  height: 260px;
+  pointer-events: none;
+  opacity: 0.16;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='none' stroke='rgba(255,190,0,0.75)' stroke-width='1'%3E%3Cpath d='M34 56 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3Cpath d='M70 76 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3Cpath d='M34 96 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3Cpath d='M70 116 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3Cpath d='M34 136 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3Cpath d='M70 156 l18 10 v20 l-18 10 l-18-10 v-20 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loginMain__inner {
+  position: relative;
+  z-index: 1;
+  padding-top: 70px;
+  padding-bottom: 86px;
+}
+
+.loginMain__head {
+  text-align: center;
+}
+
+.loginMain__title {
+  margin: 0;
+  font-family: var(--font-italiana);
+  font-size: 66px;
+  line-height: 1.05;
+  color: rgba(47, 38, 33, 0.92);
+}
+
+.loginMain__accent {
+  color: var(--color-gold);
+}
+
+.loginMain__subtitle {
+  margin: 10px 0 0 0;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(47, 38, 33, 0.55);
+}
+
+.loginCards {
+  margin-top: 54px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 48px;
+}
+
+.loginCard {
+  width: 440px;
+  min-height: 360px;
+
+  padding: 26px 26px 22px 26px;
+
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(47, 38, 33, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 12px 26px rgba(47, 38, 33, 0.16);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.loginCard--dark {
+  background: linear-gradient(135deg, rgba(47, 38, 33, 0.95), rgba(47, 38, 33, 0.9));
+  border: 1px solid rgba(255, 190, 0, 0.35);
+  box-shadow: 0 16px 44px rgba(47, 38, 33, 0.26);
+}
+
+.loginCard__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-soft));
+  color: var(--color-text-dark);
+}
+
+.loginCard__svg {
+  width: 26px;
+  height: 26px;
+}
+
+.loginCard__title {
+  margin: 18px 0 0 0;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(47, 38, 33, 0.9);
+}
+
+.loginCard__desc {
+  margin: 10px 0 0 0;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(47, 38, 33, 0.55);
+  max-width: 300px;
+}
+
+.loginCard--dark .loginCard__title {
+  color: rgba(255, 248, 240, 0.86);
+}
+
+.loginCard--dark .loginCard__desc {
+  color: rgba(255, 248, 240, 0.6);
+}
+
+.loginCard__bullets {
+  margin: 16px 0 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loginCard__bullet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-family: var(--font-inter);
+  font-size: 11px;
+  line-height: 1.2;
+  color: rgba(47, 38, 33, 0.62);
+}
+
+.loginCard--dark .loginCard__bullet {
+  color: rgba(255, 248, 240, 0.68);
+}
+
+.loginDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-gold);
+  flex: 0 0 auto;
+}
+
+.loginCard__btn {
+  margin-top: auto;
+  height: 44px;
+  width: 100%;
+
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 1;
+
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-soft));
+  color: var(--color-text-dark);
+  box-shadow: 0 8px 20px rgba(47, 38, 33, 0.16);
+}
+
+.loginCard--dark .loginCard__btn {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 1040px) {
+  .loginCards {
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .loginCard {
+    width: 100%;
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .loginCards {
+    gap: 36px;
+  }
+}
+
+@media (max-width: 992px) {
+  .loginMain__inner {
+    padding-top: 62px;
+    padding-bottom: 76px;
+  }
+
+  .loginCards {
+    margin-top: 44px;
+  }
+}
+
+@media (max-width: 768px) {
+  .loginMain__inner {
+    padding-top: 58px;
+    padding-bottom: 72px;
+  }
+
+  .loginMain__title {
+    font-size: 48px;
+  }
+
+  .loginCard {
+    padding: 22px 22px 20px 22px;
+  }
+
+  .loginCard__desc {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginMain__inner {
+    padding-top: 52px;
+    padding-bottom: 66px;
+  }
+
+  .loginMain__title {
+    font-size: 40px;
+  }
+
+  .loginCard {
+    padding: 18px 18px 16px 18px;
+  }
+
+  .loginCard__icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .loginCard__btn {
+    height: 42px;
+  }
+}

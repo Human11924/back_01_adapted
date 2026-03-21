@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.organization import Organization
 from app.models.user import User
 from app.services.security import verify_password
 from app.services.auth import create_access_token
@@ -15,19 +16,40 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == form_data.username).first()
+    email = form_data.username
+    password = form_data.password
+
+    user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
-        )
+        org = db.query(Organization).filter(Organization.email == email).first()
+        if not org:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+            )
 
-    if not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Wrong password"
+        if not verify_password(password, org.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Wrong password",
+            )
+
+        user = User(
+            email=email,
+            password_hash=org.password_hash,
+            role="admin",
+            organization_id=org.id,
         )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        if not verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Wrong password",
+            )
 
     access_token = create_access_token({"user_id": user.id})
 

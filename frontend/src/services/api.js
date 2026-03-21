@@ -1,8 +1,14 @@
 import axios from "axios";
-import { getToken, removeToken } from "../utils/auth";
+import {
+  getToken,
+  removeCurrentUser,
+  removeToken,
+} from "../utils/auth";
+
+const DEFAULT_BASE_URL = "http://127.0.0.1:8000";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL,
 });
 
 api.interceptors.request.use(
@@ -23,7 +29,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       removeToken();
-      window.location.href = "/login";
+      removeCurrentUser();
+
+      // Keep handling simple and predictable across the app.
+      if (window.location.pathname !== "/login") {
+        window.location.assign("/login");
+      }
     }
 
     return Promise.reject(error);

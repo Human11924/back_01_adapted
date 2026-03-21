@@ -15,6 +15,7 @@ from app.schemas.activity import (
     ActivityAttemptRead,
 )
 from app.services.dependencies import get_current_user
+from app.services.gamification import award_activity_completion_xp
 
 router = APIRouter(tags=["Activities"])
 
@@ -160,6 +161,10 @@ def create_activity_attempt(
     )
 
     db.add(attempt)
+    db.flush()
+
+    award_activity_completion_xp(db=db, attempt=attempt)
+
     db.commit()
     db.refresh(attempt)
 

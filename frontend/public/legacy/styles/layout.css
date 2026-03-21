@@ -1,0 +1,7 @@
+.container {
+  width: 100%;
+  padding-left: var(--px-page);
+  padding-right: var(--px-page);
+
+  /* TODO: SPEC — если нужен max-width + центрирование, дай точное значение */
+}

@@ -1,7 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { getToken } from "../utils/auth";
 
-export default function ProtectedRoute({ user, allowedRole, children }) {
+function defaultRouteForRole(role) {
+  if (role === "admin") return "/dashboard";
+  if (role === "employee") return "/profile";
+  return "/login";
+}
+
+export default function ProtectedRoute({ user, allowedRole, allowedRoles, children }) {
   const token = getToken();
 
   if (!token) {
@@ -12,16 +18,15 @@ export default function ProtectedRoute({ user, allowedRole, children }) {
     return <div>Loading...</div>;
   }
 
-  if (allowedRole && user.role !== allowedRole) {
-    if (user.role === "admin") {
-      return <Navigate to="/dashboard" replace />;
-    }
+  const normalizedAllowedRoles =
+    Array.isArray(allowedRoles) && allowedRoles.length > 0
+      ? allowedRoles
+      : allowedRole
+        ? [allowedRole]
+        : null;
 
-    if (user.role === "employee") {
-      return <Navigate to="/profile" replace />;
-    }
-
-    return <Navigate to="/login" replace />;
+  if (normalizedAllowedRoles && !normalizedAllowedRoles.includes(user.role)) {
+    return <Navigate to={defaultRouteForRole(user.role)} replace />;
   }
 
   return children;

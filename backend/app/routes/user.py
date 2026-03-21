@@ -27,10 +27,13 @@ def create_user(
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    role = "admin" if user.email == organization.email else "employee"
+
     db_user = User(
         email=user.email,
         password_hash=hash_password(user.password),
-        organization_id=organization.id
+        organization_id=organization.id,
+        role=role,
     )
 
     db.add(db_user)

@@ -26,3 +26,16 @@ class EmployeeProfile(Base):
         back_populates="employee",
         cascade="all, delete-orphan"
     )
+
+    points = relationship(
+        "EmployeePoints",
+        back_populates="employee",
+        cascade="all, delete-orphan",
+        uselist=False
+    )
+
+    employee_badges = relationship(
+        "EmployeeBadge",
+        back_populates="employee",
+        cascade="all, delete-orphan"
+    )

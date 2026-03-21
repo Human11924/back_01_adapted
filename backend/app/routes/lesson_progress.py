@@ -16,6 +16,7 @@ from app.schemas.lesson_progress import (
     MyProgressResponse,
 )
 from app.services.dependencies import get_current_user
+from app.services.gamification import award_lesson_completion_xp
 
 router = APIRouter(tags=["Lesson Progress"])
 
@@ -204,6 +205,8 @@ def update_lesson_progress(
     if not progress:
         raise HTTPException(status_code=404, detail="Lesson progress not found. Start lesson first.")
 
+    was_completed = progress.status == "completed"
+
     if payload.progress_percent is not None:
         if payload.progress_percent < 0 or payload.progress_percent > 100:
             raise HTTPException(status_code=400, detail="progress_percent must be between 0 and 100")
@@ -225,6 +228,23 @@ def update_lesson_progress(
             progress.progress_percent = 1
 
     progress.updated_at = datetime.utcnow()
+
+    if (not was_completed) and progress.status == "completed":
+        lesson = (
+            db.query(Lesson)
+            .options(joinedload(Lesson.module))
+            .filter(Lesson.id == lesson_id)
+            .first()
+        )
+        if not lesson:
+            raise HTTPException(status_code=404, detail="Lesson not found")
+
+        award_lesson_completion_xp(
+            db=db,
+            employee_id=my_profile.id,
+            enrollment_id=progress.enrollment_id,
+            module_id=lesson.module_id,
+        )
 
     db.commit()
     db.refresh(progress)
@@ -270,9 +290,26 @@ def complete_lesson(
             updated_at=datetime.utcnow()
         )
         db.add(progress)
+        lesson = (
+            db.query(Lesson)
+            .options(joinedload(Lesson.module))
+            .filter(Lesson.id == lesson_id)
+            .first()
+        )
+        if not lesson:
+            raise HTTPException(status_code=404, detail="Lesson not found")
+
+        award_lesson_completion_xp(
+            db=db,
+            employee_id=my_profile.id,
+            enrollment_id=enrollment.id,
+            module_id=lesson.module_id,
+        )
         db.commit()
         db.refresh(progress)
         return progress
+
+    was_completed = progress.status == "completed"
 
     progress.status = "completed"
     progress.progress_percent = 100
@@ -281,6 +318,23 @@ def complete_lesson(
     if progress.completed_at is None:
         progress.completed_at = datetime.utcnow()
     progress.updated_at = datetime.utcnow()
+
+    if not was_completed:
+        lesson = (
+            db.query(Lesson)
+            .options(joinedload(Lesson.module))
+            .filter(Lesson.id == lesson_id)
+            .first()
+        )
+        if not lesson:
+            raise HTTPException(status_code=404, detail="Lesson not found")
+
+        award_lesson_completion_xp(
+            db=db,
+            employee_id=my_profile.id,
+            enrollment_id=progress.enrollment_id,
+            module_id=lesson.module_id,
+        )
 
     db.commit()
     db.refresh(progress)

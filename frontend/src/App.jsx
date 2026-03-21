@@ -1,41 +1,27 @@
-import { useEffect, useState } from "react";
+import useAuthUser from "./hooks/useAuthUser";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import api from "./services/api";
-import { getToken, removeToken } from "./utils/auth";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import EmployeeDetail from "./pages/EmployeeDetail";
 import Profile from "./pages/Profile";
+import MyCourses from "./pages/MyCourses";
+import CourseViewer from "./pages/CourseViewer";
+import Leaderboard from "./pages/Leaderboard";
+import Notifications from "./pages/Notifications";
+import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+function defaultRouteForRole(role) {
+  if (role === "admin") return "/dashboard";
+  if (role === "employee") return "/profile";
+  return "/login";
+}
+
 function AppRoutes() {
-  const [user, setUser] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true);
+  const { user, setUser, loading } = useAuthUser();
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = getToken();
-
-      if (!token) {
-        setLoadingUser(false);
-        return;
-      }
-
-      try {
-        const response = await api.get("/users/me");
-        setUser(response.data);
-      } catch (error) {
-        removeToken();
-        setUser(null);
-      } finally {
-        setLoadingUser(false);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
-
-  if (loadingUser) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -45,11 +31,7 @@ function AppRoutes() {
         path="/login"
         element={
           user ? (
-            user.role === "admin" ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/profile" replace />
-            )
+            <Navigate to={defaultRouteForRole(user.role)} replace />
           ) : (
             <Login setUser={setUser} />
           )
@@ -59,8 +41,26 @@ function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute user={user} allowedRole="admin">
+          <ProtectedRoute user={user} allowedRoles={["admin"]}>
             <Dashboard user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/employees/:employeeId"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["admin"]}>
+            <EmployeeDetail user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["admin"]}>
+            <Analytics user={user} setUser={setUser} />
           </ProtectedRoute>
         }
       />
@@ -68,8 +68,44 @@ function AppRoutes() {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute user={user} allowedRole="employee">
+          <ProtectedRoute user={user} allowedRoles={["employee"]}>
             <Profile user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/my-courses"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["employee"]}>
+            <MyCourses user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/my-courses/:courseId"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["employee"]}>
+            <CourseViewer user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["admin", "employee"]}>
+            <Leaderboard user={user} setUser={setUser} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute user={user} allowedRoles={["admin", "employee"]}>
+            <Notifications user={user} setUser={setUser} />
           </ProtectedRoute>
         }
       />
@@ -78,11 +114,7 @@ function AppRoutes() {
         path="*"
         element={
           user ? (
-            user.role === "admin" ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/profile" replace />
-            )
+            <Navigate to={defaultRouteForRole(user.role)} replace />
           ) : (
             <Navigate to="/login" replace />
           )

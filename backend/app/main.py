@@ -41,10 +41,15 @@ from app.routes import (
     auth,
     employee_profile,
     dashboard,
+    employees,
     course,
     enrollment,
     lesson_progress,
-    activity
+    activity,
+    leaderboard,
+    analytics,
+    badges,
+    notifications
 )
 
 from app.models import organization as organization_model
@@ -54,6 +59,9 @@ from app.models import course as course_model
 from app.models import enrollment as enrollment_model
 from app.models import lesson_progress as lesson_progress_model
 from app.models import activity as activity_model
+from app.models import employee_points as employee_points_model
+from app.models import badge as badge_model
+from app.models import notification as notification_model
 
 app = FastAPI()
 
@@ -72,10 +80,15 @@ app.include_router(organization.router)
 app.include_router(auth.router)
 app.include_router(employee_profile.router)
 app.include_router(dashboard.router)
+app.include_router(employees.router)
 app.include_router(course.router)
 app.include_router(enrollment.router)
 app.include_router(lesson_progress.router)
 app.include_router(activity.router)
+app.include_router(leaderboard.router)
+app.include_router(analytics.router)
+app.include_router(badges.router)
+app.include_router(notifications.router)
 
 
 @app.get("/")
