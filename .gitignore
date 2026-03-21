@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# PostgreSQL / local config
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Frontend env
+frontend/.env
+frontend/.env.*
+
+# Python cache
+*.egg-info/
+.eggs/
+
+# Migrations (если будешь использовать alembic позже)
+migrations/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Temporary files
+*.swp
+*.swo
