@@ -10,7 +10,7 @@ export default function ProgressBar({ value = 0 }) {
           flex: 1,
           borderRadius: 999,
           border: "1px solid var(--border)",
-          background: "transparent",
+          background: "rgba(255,255,255,0.78)",
           overflow: "hidden",
         }}
       >
@@ -18,12 +18,13 @@ export default function ProgressBar({ value = 0 }) {
           style={{
             width: `${clamped}%`,
             height: "100%",
-            background: "var(--accent)",
-            opacity: 0.7,
+            background: "linear-gradient(90deg, var(--accent), #f3b458)",
+            boxShadow: "0 0 10px rgba(183, 121, 31, 0.35)",
+            transition: "width 260ms ease",
           }}
         />
       </div>
-      <div style={{ width: 54, textAlign: "right", fontSize: 14 }}>
+      <div style={{ width: 54, textAlign: "right", fontSize: 14, color: "var(--text-h)", fontWeight: 600 }}>
         {clamped}%
       </div>
     </div>

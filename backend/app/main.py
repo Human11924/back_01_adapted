@@ -33,6 +33,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.database import engine, Base
 from app.routes import (
@@ -74,6 +75,27 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+
+
+def ensure_activity_content_column() -> None:
+    # Keep schema updates minimal for local/dev setups without Alembic migrations.
+    with engine.begin() as conn:
+        has_column = conn.execute(
+            text(
+                """
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = 'activities' AND column_name = 'content_json'
+                LIMIT 1
+                """
+            )
+        ).scalar()
+
+        if not has_column:
+            conn.execute(text("ALTER TABLE activities ADD COLUMN content_json JSON"))
+
+
+ensure_activity_content_column()
 
 app.include_router(user.router)
 app.include_router(organization.router)

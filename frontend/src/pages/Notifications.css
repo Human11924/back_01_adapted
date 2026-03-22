@@ -1,0 +1,66 @@
+.notifications-page {
+  text-align: left;
+  background: var(--color-page-bg);
+}
+
+.notifications-content {
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+  background: var(--color-page-bg);
+}
+
+.notifications-section {
+  display: grid;
+  gap: 10px;
+}
+
+.notifications-heading {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.notifications-recommendations-list {
+  display: grid;
+  gap: 10px;
+}
+
+.notifications-recommendation-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--color-page-bg);
+  text-align: left;
+}
+
+.notifications-recommendation-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notifications-recommendation-title {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.notifications-recommendation-message {
+  font-size: 14px;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.notifications-priority-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  height: 22px;
+}
+
+@media (max-width: 860px) {
+  .notifications-content {
+    padding: 16px;
+  }
+}

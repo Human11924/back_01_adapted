@@ -14,6 +14,7 @@ class Activity(Base):
     type = Column(String, nullable=False)  # quiz / task
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
+    content_json = Column(JSON, nullable=True)
     max_score = Column(Integer, default=100)
     order_index = Column(Integer, default=1)
 

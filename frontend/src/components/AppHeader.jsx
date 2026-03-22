@@ -1,17 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { removeCurrentUser, removeToken } from "../utils/auth";
-
-function navLinkStyle(isActive) {
-  return {
-    textDecoration: "none",
-    color: isActive ? "var(--accent)" : "var(--text-h)",
-    padding: "6px 10px",
-    borderRadius: 8,
-    border: `1px solid ${isActive ? "var(--accent-border)" : "var(--border)"}`,
-    background: isActive ? "var(--accent-bg)" : "transparent",
-    fontSize: 14,
-  };
-}
+import "./AppHeader.css";
 
 export default function AppHeader({ user, setUser, title }) {
   const navigate = useNavigate();
@@ -40,47 +29,33 @@ export default function AppHeader({ user, setUser, title }) {
   }
 
   return (
-    <div
-      style={{
-        padding: "20px 24px",
-        borderBottom: "1px solid var(--border)",
-        textAlign: "left",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 16,
-        flexWrap: "wrap",
-      }}
-    >
-      <div>
-        <div style={{ fontSize: 14, color: "var(--text)" }}>AdaptEd</div>
-        <div style={{ fontSize: 20, fontWeight: 600, color: "var(--text-h)" }}>
-          {title}
+    <header className="app-header">
+      <div className="app-header__brand-wrap">
+        <img className="app-header__logo" src="/logo.svg" alt="AdaptEd logo" width="86" height="86" />
+        <div className="app-header__brand-block">
+          <div className="app-header__brand">AdaptEd</div>
+          <div className="app-header__title">{title}</div>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+      <div className="app-header__actions">
         {links.map((l) => (
-          <Link key={l.to} to={l.to} style={navLinkStyle(path === l.to)}>
+          <Link
+            key={l.to}
+            to={l.to}
+            className={`app-header__nav-link ${path === l.to ? "is-active" : ""}`}
+          >
             {l.label}
           </Link>
         ))}
 
         <button
           onClick={handleLogout}
-          style={{
-            cursor: "pointer",
-            borderRadius: 10,
-            padding: "8px 12px",
-            border: "1px solid var(--border)",
-            background: "transparent",
-            color: "var(--text-h)",
-            fontSize: 14,
-          }}
+          className="app-header__logout"
         >
           Logout
         </button>
       </div>
-    </div>
+    </header>
   );
 }

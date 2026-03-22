@@ -5,6 +5,10 @@ import AppHeader from "../components/AppHeader";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import ProgressBar from "../components/ProgressBar";
+import TirGame from "../components/TirGame";
+import VocabularyIntroActivity from "../components/VocabularyIntroActivity";
+import McqQuizActivity from "../components/McqQuizActivity";
+import "./CourseViewer.css";
 
 function sortByOrderIndex(items = []) {
   return [...items].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
@@ -33,6 +37,11 @@ export default function CourseViewer({ user, setUser }) {
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [activityCompletion, setActivityCompletion] = useState({});
+  const [activityHint, setActivityHint] = useState("");
+  const [lessonSuccess, setLessonSuccess] = useState("");
+  const [xpSnapshot, setXpSnapshot] = useState(null);
+  const [badgesCount, setBadgesCount] = useState(null);
 
   const progressByLessonId = useMemo(() => {
     const map = new Map();
@@ -49,10 +58,46 @@ export default function CourseViewer({ user, setUser }) {
     return lessonsFlat.find((l) => l.id === selectedLessonId) || null;
   }, [lessonsFlat, selectedLessonId]);
 
+  const selectedLessonStatus =
+    selectedLessonId && progressByLessonId.get(selectedLessonId)
+      ? progressByLessonId.get(selectedLessonId).status
+      : "not_started";
+
+  const completedActivitiesCount = useMemo(
+    () => activities.filter((a) => activityCompletion[a.id]).length,
+    [activities, activityCompletion]
+  );
+
+  const nextPendingActivity = useMemo(
+    () => activities.find((a) => !activityCompletion[a.id]) || null,
+    [activities, activityCompletion]
+  );
+
+  const nextLessonAfterSelected = useMemo(() => {
+    if (!selectedLessonId) return null;
+    const idx = lessonsFlat.findIndex((lesson) => lesson.id === selectedLessonId);
+    if (idx < 0 || idx >= lessonsFlat.length - 1) return null;
+    return lessonsFlat[idx + 1];
+  }, [lessonsFlat, selectedLessonId]);
+
   const refreshEnrollmentProgress = async (enrollmentId) => {
     const res = await api.get(`/enrollments/${enrollmentId}/progress`);
     setEnrollmentProgress(res.data);
     return res.data;
+  };
+
+  const refreshRewardSnapshot = async () => {
+    try {
+      const [xpRes, badgesRes] = await Promise.all([
+        api.get("/leaderboard/me"),
+        api.get("/badges/me"),
+      ]);
+
+      setXpSnapshot(xpRes.data);
+      setBadgesCount((badgesRes.data || []).length);
+    } catch {
+      // Keep viewer resilient if rewards endpoints are temporarily unavailable.
+    }
   };
 
   useEffect(() => {
@@ -80,7 +125,10 @@ export default function CourseViewer({ user, setUser }) {
           return;
         }
 
-        await refreshEnrollmentProgress(myItem.enrollment_id);
+        await Promise.all([
+          refreshEnrollmentProgress(myItem.enrollment_id),
+          refreshRewardSnapshot(),
+        ]);
       } catch (err) {
         const message =
           err?.response?.data?.detail || err?.message || "Failed to load course";
@@ -115,7 +163,10 @@ export default function CourseViewer({ user, setUser }) {
       if (!selectedLessonId || !enrollmentProgress) return;
 
       setActionError("");
+      setActivityHint("");
+      setLessonSuccess("");
       setActivities([]);
+      setActivityCompletion({});
 
       try {
         // Mark this lesson as started (in_progress) when opened.
@@ -126,7 +177,27 @@ export default function CourseViewer({ user, setUser }) {
         await refreshEnrollmentProgress(enrollmentProgress.enrollment_id);
 
         const actsRes = await api.get(`/lessons/${selectedLessonId}/activities`);
-        setActivities(actsRes.data || []);
+        const activitiesList = actsRes.data || [];
+        setActivities(activitiesList);
+
+        if (activitiesList.length > 0) {
+          const completionPairs = await Promise.all(
+            activitiesList.map(async (activity) => {
+              if (activity.type === "task") {
+                return [activity.id, false];
+              }
+
+              try {
+                const attemptsRes = await api.get(`/activities/${activity.id}/attempts`);
+                return [activity.id, (attemptsRes.data || []).length > 0];
+              } catch {
+                return [activity.id, false];
+              }
+            })
+          );
+
+          setActivityCompletion(Object.fromEntries(completionPairs));
+        }
       } catch (err) {
         const message = err?.response?.data?.detail || err?.message;
         if (message) setActionError(message);
@@ -148,6 +219,10 @@ export default function CourseViewer({ user, setUser }) {
       const updatedProgress = await refreshEnrollmentProgress(
         enrollmentProgress.enrollment_id
       );
+      await refreshRewardSnapshot();
+
+      setLessonSuccess("Lesson completed. Great job. Your progress and rewards have been updated.");
+      setActivityHint("");
 
       const updatedProgressByLessonId = new Map();
       for (const item of updatedProgress?.lesson_progress || []) {
@@ -181,11 +256,20 @@ export default function CourseViewer({ user, setUser }) {
     }
   };
 
+  const handleActivityCompleted = async (activity, label) => {
+    setActivityCompletion((prev) => ({ ...prev, [activity.id]: true }));
+    setActivityHint(`${label} completed. Continue with the next activity.`);
+
+    if (activity.type !== "task") {
+      await refreshRewardSnapshot();
+    }
+  };
+
   const courseTitle = course?.title || "Course";
 
   if (loading) {
     return (
-      <div style={{ textAlign: "left" }}>
+      <div className="course-viewer-page">
         <AppHeader user={user} setUser={setUser} title={courseTitle} />
         <LoadingState label="Loading course viewer…" />
       </div>
@@ -194,9 +278,9 @@ export default function CourseViewer({ user, setUser }) {
 
   if (error) {
     return (
-      <div style={{ textAlign: "left" }}>
+      <div className="course-viewer-page">
         <AppHeader user={user} setUser={setUser} title={courseTitle} />
-        <div style={{ padding: 24 }}>
+        <div className="course-viewer-content">
           <EmptyState title="Course unavailable" description={error} />
         </div>
       </div>
@@ -205,9 +289,9 @@ export default function CourseViewer({ user, setUser }) {
 
   if (!course || !enrollmentProgress) {
     return (
-      <div style={{ textAlign: "left" }}>
+      <div className="course-viewer-page">
         <AppHeader user={user} setUser={setUser} title={courseTitle} />
-        <div style={{ padding: 24 }}>
+        <div className="course-viewer-content">
           <EmptyState title="No course data" />
         </div>
       </div>
@@ -217,20 +301,11 @@ export default function CourseViewer({ user, setUser }) {
   const modules = sortByOrderIndex(course.modules || []);
 
   return (
-    <div style={{ textAlign: "left" }}>
+    <div className="course-viewer-page">
       <AppHeader user={user} setUser={setUser} title={courseTitle} />
 
-      <div style={{ padding: 24, display: "grid", gap: 14 }}>
-        <div
-          style={{
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            padding: 16,
-            background: "var(--social-bg)",
-            display: "grid",
-            gap: 10,
-          }}
-        >
+      <div className="course-viewer-content">
+        <div className="course-viewer-summary-card">
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
             <div>
               <div style={{ fontSize: 14, color: "var(--text)" }}>Progress</div>
@@ -238,32 +313,24 @@ export default function CourseViewer({ user, setUser }) {
                 {enrollmentProgress.completed_lessons}/{enrollmentProgress.total_lessons} lessons
               </div>
             </div>
-            <div style={{ fontSize: 14, color: "var(--text)" }}>
-              {enrollmentProgress.progress_percent}%
+            <div style={{ display: "grid", gap: 2, textAlign: "right", fontSize: 14, color: "var(--text)" }}>
+              <div>{enrollmentProgress.progress_percent}%</div>
+              <div>XP: {xpSnapshot?.total_xp ?? "-"}</div>
+              <div>Badges: {badgesCount ?? "-"}</div>
             </div>
           </div>
           <ProgressBar value={enrollmentProgress.progress_percent} />
+          <div style={{ fontSize: 13, color: "var(--text)" }}>
+            Current lesson: <strong style={{ color: "var(--text-h)" }}>{selectedLesson?.title || "Not selected"}</strong>
+          </div>
         </div>
 
         {modules.length === 0 ? (
           <EmptyState title="This course has no modules yet" />
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(260px, 340px) 1fr",
-              gap: 14,
-              alignItems: "stretch",
-            }}
-          >
+          <div className="course-viewer-shell">
             <div
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                background: "transparent",
-                overflow: "hidden",
-                minHeight: 420,
-              }}
+              className="course-viewer-side-panel"
             >
               <div
                 style={{
@@ -351,13 +418,7 @@ export default function CourseViewer({ user, setUser }) {
             </div>
 
             <div
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                background: "transparent",
-                overflow: "hidden",
-                minHeight: 420,
-              }}
+              className="course-viewer-main-panel"
             >
               <div
                 style={{
@@ -375,7 +436,7 @@ export default function CourseViewer({ user, setUser }) {
                     {selectedLesson?.title || "Select a lesson"}
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>
-                    {selectedLesson?.lesson_type || ""}
+                    {selectedLesson?.lesson_type || ""} • {selectedLessonStatus.replace("_", " ")}
                   </div>
                 </div>
 
@@ -387,16 +448,8 @@ export default function CourseViewer({ user, setUser }) {
                       ? progressByLessonId.get(selectedLessonId)?.status === "completed"
                       : true)
                   }
-                  style={{
-                    cursor: markingComplete ? "not-allowed" : "pointer",
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    border: "1px solid var(--border)",
-                    background: "transparent",
-                    color: "var(--text-h)",
-                    fontSize: 14,
-                    whiteSpace: "nowrap",
-                  }}
+                  className="course-viewer-complete-btn"
+                  style={{ cursor: markingComplete ? "not-allowed" : "pointer" }}
                 >
                   {progressByLessonId.get(selectedLessonId)?.status === "completed"
                     ? "Completed"
@@ -407,6 +460,41 @@ export default function CourseViewer({ user, setUser }) {
               </div>
 
               <div style={{ padding: 16, display: "grid", gap: 12 }}>
+                {selectedLesson ? (
+                  <div
+                    style={{
+                      border: "1px solid var(--border)",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.9)",
+                      boxShadow: "0 8px 16px rgba(47, 38, 33, 0.05)",
+                      padding: 12,
+                      display: "grid",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Next recommended action</div>
+                    <div style={{ fontSize: 15, color: "var(--text-h)", fontWeight: 700 }}>
+                      {selectedLessonStatus === "completed"
+                        ? nextLessonAfterSelected
+                          ? `Open next lesson: ${nextLessonAfterSelected.title}`
+                          : "Course complete. Review your score and badges."
+                        : nextPendingActivity
+                          ? `Complete activity ${activities.findIndex((a) => a.id === nextPendingActivity.id) + 1}: ${nextPendingActivity.title}`
+                          : "All activities are done. Click Mark completed."}
+                    </div>
+
+                    {selectedLessonStatus === "completed" && nextLessonAfterSelected ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLessonId(nextLessonAfterSelected.id)}
+                        className="course-viewer-next-btn"
+                      >
+                        Go to next lesson
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 {actionError ? (
                   <div
                     style={{
@@ -422,6 +510,37 @@ export default function CourseViewer({ user, setUser }) {
                   </div>
                 ) : null}
 
+                {activityHint ? (
+                  <div
+                    style={{
+                      padding: 10,
+                      borderRadius: 10,
+                      border: "1px solid var(--border)",
+                      background: "#fff",
+                      color: "var(--text-h)",
+                      fontSize: 14,
+                    }}
+                  >
+                    {activityHint}
+                  </div>
+                ) : null}
+
+                {lessonSuccess ? (
+                  <div
+                    style={{
+                      padding: 10,
+                      borderRadius: 10,
+                      border: "1px solid var(--border)",
+                      background: "#fff",
+                      color: "var(--text-h)",
+                      fontSize: 14,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {lessonSuccess}
+                  </div>
+                ) : null}
+
                 {!selectedLesson ? (
                   <EmptyState title="Select a lesson" />
                 ) : activities.length === 0 ? (
@@ -431,29 +550,55 @@ export default function CourseViewer({ user, setUser }) {
                   />
                 ) : (
                   <div style={{ display: "grid", gap: 10 }}>
-                    {activities.map((a) => (
+                    {activities.map((a, index) => (
+                      (() => {
+                        const completed = Boolean(activityCompletion[a.id]);
+
+                        return (
                       <div
                         key={a.id}
                         style={{
                           border: "1px solid var(--border)",
                           borderRadius: 12,
                           padding: 12,
-                          background: "var(--social-bg)",
+                          background: "rgba(255,255,255,0.72)",
+                          boxShadow: "0 8px 16px rgba(47, 38, 33, 0.05)",
                         }}
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                          <div style={{ fontWeight: 700, color: "var(--text-h)" }}>{a.title}</div>
-                          <div
-                            style={{
-                              fontSize: 12,
-                              padding: "2px 8px",
-                              borderRadius: 999,
-                              border: "1px solid var(--border)",
-                              color: "var(--text)",
-                              height: 18,
-                            }}
-                          >
-                            {a.type}
+                          <div style={{ display: "grid", gap: 4 }}>
+                            <div style={{ fontSize: 12, color: "var(--text)" }}>
+                              Activity {index + 1} of {activities.length}
+                            </div>
+                            <div style={{ fontWeight: 700, color: "var(--text-h)" }}>{a.title}</div>
+                          </div>
+                          <div style={{ display: "grid", gap: 6, justifyItems: "end" }}>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                padding: "2px 8px",
+                                borderRadius: 999,
+                                border: "1px solid var(--border)",
+                                color: "var(--text)",
+                                height: 18,
+                              }}
+                            >
+                              {a.type}
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: 12,
+                                padding: "2px 8px",
+                                borderRadius: 999,
+                                border: "1px solid var(--border)",
+                                color: completed ? "var(--accent)" : "var(--text)",
+                                background: completed ? "var(--accent-bg)" : "transparent",
+                                height: 18,
+                              }}
+                            >
+                              {completed ? "completed" : "pending"}
+                            </div>
                           </div>
                         </div>
                         {a.description ? (
@@ -461,7 +606,36 @@ export default function CourseViewer({ user, setUser }) {
                             {a.description}
                           </div>
                         ) : null}
+
+                        {a.type === "task" && a?.content_json?.kind === "vocabulary_intro" ? (
+                          <div style={{ marginTop: 10 }}>
+                            <VocabularyIntroActivity
+                              activity={a}
+                              onComplete={() => handleActivityCompleted(a, "Vocabulary intro")}
+                            />
+                          </div>
+                        ) : null}
+
+                        {a.type === "tir_game" ? (
+                          <div style={{ marginTop: 10 }}>
+                            <TirGame
+                              activity={a}
+                              onComplete={() => handleActivityCompleted(a, "TIR game")}
+                            />
+                          </div>
+                        ) : null}
+
+                        {a.type === "quiz" && a?.content_json?.kind === "mcq_quiz" ? (
+                          <div style={{ marginTop: 10 }}>
+                            <McqQuizActivity
+                              activity={a}
+                              onComplete={() => handleActivityCompleted(a, "Quiz")}
+                            />
+                          </div>
+                        ) : null}
                       </div>
+                        );
+                      })()
                     ))}
                   </div>
                 )}

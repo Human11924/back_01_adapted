@@ -5,6 +5,7 @@ import AppHeader from "../components/AppHeader";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import ProgressBar from "../components/ProgressBar";
+import "./MyCourses.css";
 
 function statusFromProgress(progressPercent) {
   const p = Number(progressPercent) || 0;
@@ -17,6 +18,7 @@ export default function MyCourses({ user, setUser }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bootstrappingDemo, setBootstrappingDemo] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,7 +26,23 @@ export default function MyCourses({ user, setUser }) {
     const run = async () => {
       try {
         const res = await api.get("/my-progress");
-        setItems(res.data?.items || []);
+        const nextItems = res.data?.items || [];
+
+        if (nextItems.length === 0) {
+          setBootstrappingDemo(true);
+
+          try {
+            await api.post("/courses/demo/bootstrap");
+            const retryRes = await api.get("/my-progress");
+            setItems(retryRes.data?.items || []);
+          } catch {
+            setItems(nextItems);
+          } finally {
+            setBootstrappingDemo(false);
+          }
+        } else {
+          setItems(nextItems);
+        }
       } catch (err) {
         const message =
           err?.response?.data?.detail ||
@@ -40,11 +58,12 @@ export default function MyCourses({ user, setUser }) {
   }, []);
 
   return (
-    <div style={{ textAlign: "left" }}>
+    <div className="my-courses-page">
       <AppHeader user={user} setUser={setUser} title="My Courses" />
 
-      <div style={{ padding: 24, display: "grid", gap: 14 }}>
+      <div className="my-courses-content">
         {loading ? <LoadingState label="Loading your courses…" /> : null}
+        {!loading && bootstrappingDemo ? <LoadingState label="Preparing your demo course…" /> : null}
         {!loading && error ? (
           <EmptyState title="My Courses unavailable" description={error} />
         ) : null}
@@ -60,21 +79,19 @@ export default function MyCourses({ user, setUser }) {
           ? items.map((it) => (
               <div
                 key={it.enrollment_id}
-                style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: 12,
-                  padding: 16,
-                  background: "var(--social-bg)",
-                  display: "grid",
-                  gap: 12,
-                }}
+                className="my-courses-card"
               >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                <div className="my-courses-card__header">
                   <div>
-                    <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-h)" }}>
+                    <div className="my-courses-card__title">
                       {it.course_title}
                     </div>
-                    <div style={{ fontSize: 14, color: "var(--text)", marginTop: 4 }}>
+                    {it.course_title === "English for F&B Staff" ? (
+                      <div className="my-courses-card__demo-badge">
+                        Demo Ready
+                      </div>
+                    ) : null}
+                    <div className="my-courses-card__meta">
                       Lessons: {it.completed_lessons}/{it.total_lessons} • Status:{" "}
                       {statusFromProgress(it.progress_percent)}
                     </div>
@@ -82,19 +99,9 @@ export default function MyCourses({ user, setUser }) {
 
                   <button
                     onClick={() => navigate(`/my-courses/${it.course_id}`)}
-                    style={{
-                      cursor: "pointer",
-                      borderRadius: 10,
-                      padding: "10px 12px",
-                      border: "1px solid var(--border)",
-                      background: "transparent",
-                      color: "var(--text-h)",
-                      fontSize: 14,
-                      height: 40,
-                      alignSelf: "flex-start",
-                    }}
+                    className="my-courses-card__cta"
                   >
-                    Continue
+                    {it.course_title === "English for F&B Staff" ? "Start Demo" : "Continue"}
                   </button>
                 </div>
 

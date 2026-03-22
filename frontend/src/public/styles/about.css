@@ -1,0 +1,72 @@
+.about {
+  background: var(--color-page-bg);
+}
+
+.aboutHero {
+  padding: 48px 0 24px;
+}
+
+.aboutHero__inner {
+  text-align: left;
+}
+
+.aboutHero__title {
+  margin: 0;
+  font-family: var(--font-italiana);
+  font-size: clamp(42px, 5vw, 64px);
+  line-height: 1;
+  color: var(--color-text-dark);
+}
+
+.aboutHero__accent {
+  color: var(--color-gold);
+}
+
+.aboutHero__subtitle {
+  margin-top: 18px;
+  max-width: 760px;
+  font-size: 20px;
+  line-height: 1.45;
+  color: rgba(47, 38, 33, 0.86);
+}
+
+.aboutSection {
+  padding: 18px 0 60px;
+}
+
+.aboutSection__inner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.aboutCard {
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid rgba(47, 38, 33, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 224, 135, 0.25));
+}
+
+.aboutCard__title {
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--color-text-dark);
+}
+
+.aboutCard__text {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: rgba(47, 38, 33, 0.9);
+}
+
+@media (max-width: 992px) {
+  .aboutSection__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .aboutHero__subtitle {
+    font-size: 18px;
+  }
+}

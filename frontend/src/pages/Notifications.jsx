@@ -4,6 +4,7 @@ import AppHeader from "../components/AppHeader";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import NotificationList from "../components/NotificationList";
+import "./Notifications.css";
 
 function endpointFor(role, kind) {
   // kind: 'notifications' | 'recommendations'
@@ -57,10 +58,10 @@ export default function Notifications({ user, setUser }) {
   };
 
   return (
-    <div style={{ textAlign: "left" }}>
+    <div className="notifications-page">
       <AppHeader user={user} setUser={setUser} title="Notifications" />
 
-      <div style={{ padding: 24, display: "grid", gap: 18 }}>
+      <div className="notifications-content">
         {loading ? <LoadingState label="Loading notifications…" /> : null}
         {!loading && error ? (
           <EmptyState title="Notifications unavailable" description={error} />
@@ -68,8 +69,8 @@ export default function Notifications({ user, setUser }) {
 
         {!loading && !error ? (
           <>
-            <div style={{ display: "grid", gap: 10 }}>
-              <h2 style={{ margin: 0 }}>Notifications</h2>
+            <div className="notifications-section">
+              <h2 className="notifications-heading">Notifications</h2>
               {notifications.length === 0 ? (
                 <EmptyState title="No notifications" />
               ) : (
@@ -77,40 +78,25 @@ export default function Notifications({ user, setUser }) {
               )}
             </div>
 
-            <div style={{ display: "grid", gap: 10 }}>
-              <h2 style={{ margin: 0 }}>Recommendations</h2>
+            <div className="notifications-section">
+              <h2 className="notifications-heading">Recommendations</h2>
               {recommendations.length === 0 ? (
                 <EmptyState title="No recommendations" />
               ) : (
-                <div style={{ display: "grid", gap: 10 }}>
+                <div className="notifications-recommendations-list">
                   {recommendations.map((r, idx) => (
                     <div
                       key={`${r.type}-${idx}`}
-                      style={{
-                        border: "1px solid var(--border)",
-                        borderRadius: 12,
-                        padding: 12,
-                        background: "var(--social-bg)",
-                        textAlign: "left",
-                      }}
+                      className="notifications-recommendation-card"
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                      <div className="notifications-recommendation-top">
                         <div>
-                          <div style={{ fontWeight: 600, color: "var(--text-h)" }}>{r.title}</div>
-                          <div style={{ fontSize: 14, color: "var(--text)", marginTop: 4 }}>
+                          <div className="notifications-recommendation-title">{r.title}</div>
+                          <div className="notifications-recommendation-message">
                             {r.message}
                           </div>
                         </div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            padding: "4px 8px",
-                            borderRadius: 999,
-                            border: "1px solid var(--border)",
-                            color: "var(--text)",
-                            height: 22,
-                          }}
-                        >
+                        <div className="notifications-priority-badge">
                           {r.priority || "medium"}
                         </div>
                       </div>

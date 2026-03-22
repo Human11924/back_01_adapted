@@ -1,6 +1,12 @@
 import useAuthUser from "./hooks/useAuthUser";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import PublicLayout from "./public/PublicLayout";
+import Home from "./public/pages/Home";
+import About from "./public/pages/About";
+import Courses from "./public/pages/Courses";
+import Pricing from "./public/pages/Pricing";
+
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import EmployeeDetail from "./pages/EmployeeDetail";
@@ -28,15 +34,14 @@ function AppRoutes() {
   return (
     <Routes>
       <Route
-        path="/login"
-        element={
-          user ? (
-            <Navigate to={defaultRouteForRole(user.role)} replace />
-          ) : (
-            <Login setUser={setUser} />
-          )
-        }
-      />
+        element={user ? <Navigate to={defaultRouteForRole(user.role)} replace /> : <PublicLayout />}
+      >
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />
+      </Route>
 
       <Route
         path="/dashboard"
@@ -116,7 +121,7 @@ function AppRoutes() {
           user ? (
             <Navigate to={defaultRouteForRole(user.role)} replace />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to="/" replace />
           )
         }
       />

@@ -1,23 +1,76 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Colors */
+  --color-page-bg: #FFF8F0;
+  --color-text-dark: #2F2621;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --color-gold: #FFBE00;
+  --color-gold-soft: #FFE087;
+
+  --color-footer-grad-start: #513729;
+  --color-footer-grad-end: #2F2621;
+
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-icon-grad-end: #FFD96B;
+
+  /* Typography */
+  --font-italiana: "Italiana", serif;
+  --font-inter: "Inter", sans-serif;
+
+  --fs-brand: 40px;
+  --fs-header-link: 20px;
+
+  --fs-footer-desc: 15px;
+  --lh-footer-desc: 140%;
+
+  --fs-footer-title: 18px;
+  --fw-footer-title: 600;
+
+  --fs-footer-link: 16px;
+  --fs-footer-contact: 15px;
+
+  /* Spacing */
+  --px-page: 60px;
+  --gap-footer-links: 7px;
+  --gap-footer-contacts: 15px;
+
+  /* Sizes */
+  --h-header: 95px;
+  --logo-header-w: 86px;
+  --logo-header-h: 86px;
+
+  --btn-w: 155px;
+  --btn-h: 48px;
+
+  --h-footer: 216px;
+  --logo-footer-w: 66px;
+  --logo-footer-h: 66px;
+
+  --icon-contact: 23px;
+
+  /* Active app aliases */
+  --text: #5f4f42;
+  --text-h: var(--color-text-dark);
+  --bg: var(--color-page-bg);
+  --border: #ddc8b2;
+  --code-bg: #f8efe2;
+  --accent: #ad6b14;
+  --accent-bg: rgba(255, 190, 0, 0.2);
+  --accent-border: rgba(173, 107, 20, 0.5);
+  --social-bg: var(--color-page-bg);
+  --surface-strong: var(--color-page-bg);
+  --page-grad-start: #fff4e3;
+  --page-grad-mid: #fee7c4;
+  --page-grad-end: #fcdba8;
+  --shadow:
+    rgba(47, 38, 33, 0.12) 0 10px 15px -3px, rgba(47, 38, 33, 0.08) 0 4px 6px -2px;
+
+  --sans: var(--font-inter), system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: var(--font-italiana), Georgia, serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -30,28 +83,33 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
+@media (max-width: 1200px) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    --px-page: 48px;
   }
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+@media (max-width: 992px) {
+  :root {
+    --px-page: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --px-page: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --px-page: 14px;
   }
 }
 
 body {
   margin: 0;
+  background: var(--color-page-bg);
 }
 
 #root {
@@ -64,6 +122,7 @@ body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  background: var(--color-page-bg);
 }
 
 h1,

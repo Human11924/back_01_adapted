@@ -1,0 +1,74 @@
+:root {
+  /* Colors */
+  --color-page-bg: #FFF8F0;
+  --color-text-dark: #2F2621;
+
+  --color-gold: #FFBE00;
+  --color-gold-soft: #FFE087;
+
+  --color-footer-grad-start: #513729;
+  --color-footer-grad-end: #2F2621;
+
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-icon-grad-end: #FFD96B;
+
+  /* Typography */
+  --font-italiana: "Italiana", serif;
+  --font-inter: "Inter", sans-serif;
+
+  --fs-brand: 40px;
+  --fs-header-link: 20px;
+
+  --fs-footer-desc: 15px;
+  --lh-footer-desc: 140%;
+
+  --fs-footer-title: 18px;
+  --fw-footer-title: 600;
+
+  --fs-footer-link: 16px;
+  --fs-footer-contact: 15px;
+
+  /* Spacing */
+  --px-page: 60px;
+  --gap-footer-links: 7px;
+  --gap-footer-contacts: 15px;
+
+  /* Sizes */
+  --h-header: 95px;
+  --logo-header-w: 86px;
+  --logo-header-h: 86px;
+
+  --btn-w: 155px;
+  --btn-h: 48px;
+
+  --h-footer: 216px;
+  --logo-footer-w: 66px;
+  --logo-footer-h: 66px;
+
+  --icon-contact: 23px;
+
+}
+
+@media (max-width: 1200px) {
+  :root {
+    --px-page: 48px;
+  }
+}
+
+@media (max-width: 992px) {
+  :root {
+    --px-page: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --px-page: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --px-page: 14px;
+  }
+}

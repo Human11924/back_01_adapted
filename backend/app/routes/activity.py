@@ -20,6 +20,18 @@ from app.services.gamification import award_activity_completion_xp
 router = APIRouter(tags=["Activities"])
 
 
+DEFAULT_TIR_VOCAB = [
+    {"prompt_ru": "меню", "answer_en": "menu", "order_index": 1},
+    {"prompt_ru": "счёт", "answer_en": "bill", "order_index": 2},
+    {"prompt_ru": "заказ", "answer_en": "order", "order_index": 3},
+    {"prompt_ru": "столик", "answer_en": "table", "order_index": 4},
+    {"prompt_ru": "вода", "answer_en": "water", "order_index": 5},
+    {"prompt_ru": "кофе", "answer_en": "coffee", "order_index": 6},
+    {"prompt_ru": "чай", "answer_en": "tea", "order_index": 7},
+    {"prompt_ru": "гость", "answer_en": "guest", "order_index": 8},
+]
+
+
 def get_my_profile(db: Session, current_user: User) -> EmployeeProfile | None:
     return db.query(EmployeeProfile).filter(
         EmployeeProfile.user_id == current_user.id
@@ -51,18 +63,26 @@ def create_activity(
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access denied")
 
-    if payload.type not in ["quiz", "task"]:
-        raise HTTPException(status_code=400, detail="Activity type must be quiz or task")
+    if payload.type not in ["quiz", "task", "tir_game"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Activity type must be quiz, task, or tir_game"
+        )
 
     lesson = db.query(Lesson).filter(Lesson.id == payload.lesson_id).first()
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
+
+    content_json = payload.content_json
+    if payload.type == "tir_game" and not content_json:
+        content_json = {"vocabulary_items": DEFAULT_TIR_VOCAB}
 
     activity = Activity(
         lesson_id=payload.lesson_id,
         type=payload.type,
         title=payload.title,
         description=payload.description,
+        content_json=content_json,
         max_score=payload.max_score,
         order_index=payload.order_index,
     )
@@ -146,9 +166,7 @@ def create_activity_attempt(
     next_attempt_number = 1 if not last_attempt else last_attempt.attempt_number + 1
 
     score = payload.score if payload.score is not None else 0
-    if score < 0:
-        score = 0
-    if score > activity.max_score:
+    if activity.type != "tir_game" and score > activity.max_score:
         score = activity.max_score
 
     attempt = ActivityAttempt(

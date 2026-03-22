@@ -1,0 +1,182 @@
+.tirGame {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  display: grid;
+  gap: 12px;
+}
+
+.tirGame__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tirGame__stat {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.tirGame__stat strong {
+  color: var(--text-h);
+}
+
+.tirGame__prompt {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.tirGame__bars {
+  display: grid;
+  gap: 6px;
+}
+
+.tirGame__barLabel {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.tirGame__barTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.12);
+  overflow: hidden;
+}
+
+.tirGame__barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #06b6d4);
+  transition: width 200ms ease;
+}
+
+.tirGame__barTrack--timer {
+  background: rgba(127, 29, 29, 0.14);
+}
+
+.tirGame__barFill--timer {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.tirGame__arena {
+  position: relative;
+  height: 110px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(244, 243, 236, 0.8), rgba(244, 243, 236, 0.35));
+  overflow: hidden;
+}
+
+.tirGame__target {
+  position: absolute;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+  border-radius: 50%;
+  border: 2px solid #7f1d1d;
+  background: repeating-radial-gradient(
+    circle,
+    #fff 0,
+    #fff 7px,
+    #dc2626 7px,
+    #dc2626 14px,
+    #fff 14px,
+    #fff 21px,
+    #991b1b 21px,
+    #991b1b 28px
+  );
+  animation: tir-target-move 15s linear forwards;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.tirGame__target--hit {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+  transform: scale(1.06);
+}
+
+.tirGame__hole {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.15);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tirGame__form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tirGame__input {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  background: #fff;
+}
+
+.tirGame__btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tirGame__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tirGame__feedback {
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.tirGame__feedback--ok {
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.25);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.tirGame__feedback--bad {
+  color: #991b1b;
+  border-color: rgba(153, 27, 27, 0.22);
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.tirGame__done {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+@keyframes tir-target-move {
+  0% {
+    left: 8px;
+  }
+  100% {
+    left: calc(100% - 60px);
+  }
+}

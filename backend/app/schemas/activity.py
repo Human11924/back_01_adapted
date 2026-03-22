@@ -8,6 +8,7 @@ class ActivityCreate(BaseModel):
     type: str
     title: str
     description: Optional[str] = None
+    content_json: Optional[Any] = None
     max_score: int = 100
     order_index: int = 1
 
@@ -18,6 +19,7 @@ class ActivityRead(BaseModel):
     type: str
     title: str
     description: Optional[str] = None
+    content_json: Optional[Any] = None
     max_score: int
     order_index: int
 

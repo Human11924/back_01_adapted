@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import AppHeader from "../components/AppHeader";
 import BadgeList from "../components/BadgeList";
 import EmptyState from "../components/EmptyState";
 import KpiCard from "../components/KpiCard";
 import LoadingState from "../components/LoadingState";
+import { removeCurrentUser, removeToken } from "../utils/auth";
+import "./Profile.css";
 
 export default function Profile({ user, setUser }) {
   const [profile, setProfile] = useState(null);
@@ -12,6 +15,14 @@ export default function Profile({ user, setUser }) {
   const [badges, setBadges] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    removeToken();
+    removeCurrentUser();
+    setUser?.(null);
+    navigate("/login");
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -38,10 +49,10 @@ export default function Profile({ user, setUser }) {
   }, []);
 
   return (
-    <div style={{ textAlign: "left" }}>
+    <div className="profile-page">
       <AppHeader user={user} setUser={setUser} title="Profile" />
 
-      <div style={{ padding: 24, display: "grid", gap: 18 }}>
+      <div className="profile-content">
         {loading ? <LoadingState label="Loading profile…" /> : null}
         {!loading && error ? (
           <EmptyState title="Profile unavailable" description={error} />
@@ -49,29 +60,22 @@ export default function Profile({ user, setUser }) {
 
         {!loading && !error ? (
           <>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 12,
-              }}
-            >
+            <div className="profile-actions">
+              <button className="profile-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+
+            <div className="profile-kpi-grid">
               <KpiCard label="Total XP" value={points?.total_xp ?? "—"} />
               <KpiCard label="Level" value={points?.level ?? "—"} />
               <KpiCard label="Streak" value={points?.current_streak ?? "—"} />
               <KpiCard label="Weekly XP" value={points?.weekly_xp ?? "—"} />
             </div>
 
-            <div
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                padding: 16,
-                background: "var(--social-bg)",
-              }}
-            >
-              <h2 style={{ marginTop: 0 }}>Details</h2>
-              <div style={{ display: "grid", gap: 8 }}>
+            <div className="profile-details-card">
+              <h2 className="profile-details-title">Details</h2>
+              <div className="profile-details-grid">
                 <div>
                   <strong>Name:</strong> {profile?.full_name || "—"}
                 </div>
@@ -90,8 +94,8 @@ export default function Profile({ user, setUser }) {
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: 10 }}>
-              <h2 style={{ margin: 0 }}>Badges</h2>
+            <div className="profile-badges">
+              <h2 className="profile-badges-title">Badges</h2>
               {badges.length === 0 ? (
                 <EmptyState
                   title="No badges yet"
